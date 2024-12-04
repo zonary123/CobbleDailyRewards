@@ -22,7 +22,9 @@ import java.util.concurrent.CompletableFuture;
 @ToString
 public class Config {
   private boolean debug;
+  private boolean active;
   private String lang;
+  private List<String> commands;
   private DataBaseConfig database;
   private short rows;
   private int checkReward;
@@ -31,15 +33,18 @@ public class Config {
 
   public Config() {
     this.debug = false;
+    this.active = true;
     this.lang = "en";
+    this.commands = new ArrayList<>();
+    this.commands.add("dailyrewards");
     this.database = new DataBaseConfig(
       DataBaseType.JSON,
-      "",
       "dailyrewards",
+      "mongodb://localhost:27017",
       "user",
       "password"
     );
-    this.rows = 6;
+    this.rows = 3;
     this.checkReward = 15;
     this.rewards = new ArrayList<>();
     this.rewards.add(new Rewards());
@@ -52,8 +57,10 @@ public class Config {
         Config config = gson.fromJson(el, Config.class);
         this.debug = config.isDebug();
         this.lang = config.getLang();
+        this.active = config.isActive();
         this.database = config.getDatabase();
         this.rows = config.getRows();
+        this.commands = config.getCommands();
         this.checkReward = config.getCheckReward();
         this.rewards = config.getRewards();
         String data = gson.toJson(this);

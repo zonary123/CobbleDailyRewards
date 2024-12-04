@@ -3,6 +3,7 @@ package com.kingpixel.cobbledailyrewards.database;
 import com.kingpixel.cobbledailyrewards.CobbleDailyRewards;
 import com.kingpixel.cobbledailyrewards.models.Rewards;
 import com.kingpixel.cobbledailyrewards.models.UserInfo;
+import com.kingpixel.cobbleutils.util.PlayerUtils;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.Date;
@@ -24,14 +25,13 @@ public class JSONClient implements DatabaseClient {
 
   @Override public boolean isCooldownActive(Rewards rewards, ServerPlayerEntity player) {
     UserInfo userInfo = getUserInfo(player);
-    Date date = userInfo.getCooldowns().getOrDefault(rewards.getId(), new Date(1));
-    return date.after(new Date());
+    return PlayerUtils.isCooldown(userInfo.getCooldowns().getOrDefault(rewards.getId(), 1L));
   }
 
   @Override public void updateUserInfo(Rewards rewards, ServerPlayerEntity player) {
     UserInfo userInfo = getUserInfo(player);
     userInfo.getCooldowns().compute(rewards.getId(),
-      (k, v) -> new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(rewards.getCooldown()))
+      (k, v) -> System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(rewards.getCooldown())
     );
     CobbleDailyRewards.manager.getUserInfoMap().put(player.getUuid(), userInfo);
     userInfo.writeInfo(player.getUuid());
@@ -44,5 +44,12 @@ public class JSONClient implements DatabaseClient {
 
   @Override public void save() {
 
+  }
+
+  @Override public void restart(ServerPlayerEntity player) {
+    UserInfo userInfo = getUserInfo(player);
+    userInfo.getCooldowns().clear();
+    CobbleDailyRewards.manager.getUserInfoMap().put(player.getUuid(), userInfo);
+    userInfo.writeInfo(player.getUuid());
   }
 }

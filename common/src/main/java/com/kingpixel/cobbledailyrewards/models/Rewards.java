@@ -1,5 +1,6 @@
 package com.kingpixel.cobbledailyrewards.models;
 
+import com.kingpixel.cobbleutils.Model.AdvancedItemChance;
 import com.kingpixel.cobbleutils.Model.ItemChance;
 import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.util.LuckPermsUtil;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import net.minecraft.advancement.AdvancementRewards;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.ArrayList;
@@ -22,32 +24,11 @@ import java.util.List;
 public class Rewards {
   private String id;
   private short slot;
-  private int cooldown;
+  private long cooldown;
   private String permission;
   private ItemModel withoutCooldown;
   private ItemModel withCooldown;
-  private List<PermissionRewards> permissionRewards;
-
-  @Getter
-  @Setter
-  @Data
-  @ToString
-  private static class PermissionRewards {
-    private String permission;
-    private List<ItemChance> itemChances;
-
-    public PermissionRewards() {
-      this.permission = "";
-      this.itemChances = new ArrayList<>();
-      this.itemChances.addAll(ItemChance.defaultItemChances());
-    }
-
-    public PermissionRewards(String permission, List<ItemChance> itemChances) {
-      this.permission = permission;
-      this.itemChances = itemChances;
-    }
-  }
-
+  private AdvancedItemChance rewards;
 
   public Rewards() {
     this.id = "Default";
@@ -56,20 +37,7 @@ public class Rewards {
     this.permission = "";
     this.withoutCooldown = new ItemModel("minecraft:chest_minecart");
     this.withCooldown = new ItemModel("minecraft:minecart");
-    this.permissionRewards = new ArrayList<>();
-    permissionRewards.add(new PermissionRewards());
-  }
-
-
-  public void giveReward(ServerPlayerEntity player) {
-    if (permission.isEmpty() || LuckPermsUtil.checkPermission(player, permission)) {
-      permissionRewards.forEach(reward -> {
-        if (reward.getPermission().isEmpty() || LuckPermsUtil.checkPermission(player, reward.getPermission())) {
-          ItemChance.getAllRewards(reward.getItemChances(), player);
-        }
-      });
-    }
+    this.rewards = new AdvancedItemChance();
 
   }
-
 }

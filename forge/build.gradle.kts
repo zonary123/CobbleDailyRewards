@@ -41,7 +41,8 @@ dependencies {
 
     modImplementation("com.cobblemon:forge:${property("cobblemon_version")}")
     implementation("thedarkcolour:kotlinforforge:4.4.0")
-
+    
+    shadowCommon("org.mongodb:mongodb-driver-sync:5.1.2")
 }
 
 tasks.processResources {
@@ -80,6 +81,8 @@ tasks {
         exclude("org/jetbrains/**/*")
         exclude("generations/gg/generations/core/generationscore/forge/datagen/**")
 
+        relocate("org.bson", "com.kingpixel.cobbledailyrewards.bson")
+        relocate("com.mongodb", "com.kingpixel.cobbledailyrewards.mongodb")
         transformers.add(ServiceFileTransformer())
 
         configurations = listOf(project.configurations.getByName("shadowCommon"))

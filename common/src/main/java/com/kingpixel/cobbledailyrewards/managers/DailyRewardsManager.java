@@ -21,7 +21,7 @@ public class DailyRewardsManager {
 
   private Map<UUID, UserInfo> userInfoMap = new HashMap<>();
 
-  public UserInfo init(ServerPlayerEntity player) {
+  public void init(ServerPlayerEntity player) {
     UUID playerUUID = player.getUuid();
     if (CobbleDailyRewards.config.getDatabase().getType() == DataBaseType.JSON) {
       CompletableFuture<Boolean> futureRead = Utils.readFileAsync(PATH_USER_INFO, playerUUID + ".json",
@@ -38,7 +38,7 @@ public class DailyRewardsManager {
         newUserInfo.writeInfo(playerUUID);
       }
     }
-    return userInfoMap.get(playerUUID);
+    userInfoMap.get(playerUUID);
   }
 
 

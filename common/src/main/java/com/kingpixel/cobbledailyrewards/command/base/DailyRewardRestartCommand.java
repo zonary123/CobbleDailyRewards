@@ -1,8 +1,7 @@
 package com.kingpixel.cobbledailyrewards.command.base;
 
-import ca.landonjw.gooeylibs2.api.UIManager;
 import com.kingpixel.cobbledailyrewards.CobbleDailyRewards;
-import com.kingpixel.cobbledailyrewards.ui.DailyRewardUI;
+import com.kingpixel.cobbledailyrewards.database.DatabaseClientFactory;
 import com.kingpixel.cobbleutils.util.LuckPermsUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -15,38 +14,34 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 /**
  * @author Carlos Varas Alonso - 02/08/2024 12:23
  */
-public class DailyRewardCommand implements Command<ServerCommandSource> {
+public class DailyRewardRestartCommand implements Command<ServerCommandSource> {
   private static Map<UUID, Long> cooldowns = new HashMap<>();
 
   public static void register(CommandDispatcher<ServerCommandSource> dispatcher,
                               LiteralArgumentBuilder<ServerCommandSource> base) {
     dispatcher.register(
       base
-        .executes(context -> {
-          if (!context.getSource().isExecutedByPlayer()) {
-            CobbleDailyRewards.LOGGER.info("This command can only be executed by a player.");
-            return 0;
-          }
-          if (!CobbleDailyRewards.config.isActive()) return 0;
-          ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
-          UIManager.openUIForcefully(player, DailyRewardUI.getPage(player));
-          return 1;
-        })
         .then(
-          CommandManager.literal("other")
-            .requires(source -> LuckPermsUtil.checkPermission(source, 2, "cobbledailyrewards.other"))
-            .then(
+          CommandManager.literal("restart")
+            .requires(source -> LuckPermsUtil.checkPermission(source, 2, List.of("cobbledailyrewards.restart", "cobbledailyrewards.admin")))
+            .executes(context -> {
+              if (!CobbleDailyRewards.config.isActive()) return 0;
+              ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+              DatabaseClientFactory.databaseClient.restart(player);
+              return 1;
+            }).then(
               CommandManager.argument("player", EntityArgumentType.players())
                 .executes(context -> {
                   if (!CobbleDailyRewards.config.isActive()) return 0;
                   ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-                  UIManager.openUIForcefully(player, DailyRewardUI.getPage(player));
+                  DatabaseClientFactory.databaseClient.restart(player);
                   return 1;
                 })
             )

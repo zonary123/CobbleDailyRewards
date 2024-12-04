@@ -2,6 +2,8 @@ package com.kingpixel.cobbledailyrewards.command;
 
 import com.kingpixel.cobbledailyrewards.CobbleDailyRewards;
 import com.kingpixel.cobbledailyrewards.command.base.DailyRewardCommand;
+import com.kingpixel.cobbledailyrewards.command.base.DailyRewardRestartCommand;
+import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.kingpixel.cobbleutils.util.LuckPermsUtil;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -15,20 +17,31 @@ import net.minecraft.server.command.ServerCommandSource;
 public class CommandTree {
 
   public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registry) {
-    LiteralArgumentBuilder<ServerCommandSource> base = CommandManager.literal("dailyrewards");
+    CobbleDailyRewards.config.getCommands().forEach(literal -> {
+      LiteralArgumentBuilder<ServerCommandSource> base = CommandManager.literal(literal);
 
-    DailyRewardCommand.register(dispatcher, base);
+      DailyRewardCommand.register(dispatcher, base);
+      DailyRewardRestartCommand.register(dispatcher, base);
 
-    dispatcher.register(
-      base.then(
-        CommandManager.literal("reload")
-          .requires(source -> LuckPermsUtil.checkPermission(source, 2, "cobbledailyrewards.reload"))
-          .executes(context -> {
-            CobbleDailyRewards.load();
-            return 1;
-          })
-      )
-    );
+      dispatcher.register(
+        base.then(
+          CommandManager.literal("reload")
+            .requires(source -> LuckPermsUtil.checkPermission(source, 2, "cobbledailyrewards.reload"))
+            .executes(context -> {
+              if (context.getSource().isExecutedByPlayer()) {
+                context.getSource().getPlayer().sendMessage(
+                  AdventureTranslator.toNative(CobbleDailyRewards.language.getMessageReload()
+                    .replace("%prefix%", CobbleDailyRewards.language.getPrefix())
+                  )
+                );
+              }
+              CobbleDailyRewards.load();
+
+              return 1;
+            })
+        )
+      );
+    });
   }
 
 

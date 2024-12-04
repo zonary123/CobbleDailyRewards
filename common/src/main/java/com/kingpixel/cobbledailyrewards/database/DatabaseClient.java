@@ -19,4 +19,6 @@ public interface DatabaseClient {
   void disconnect();
 
   void save();
+
+  void restart(ServerPlayerEntity player);
 }

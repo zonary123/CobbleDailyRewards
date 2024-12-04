@@ -5,11 +5,14 @@ import com.kingpixel.cobbledailyrewards.config.Config;
 import com.kingpixel.cobbledailyrewards.config.Lang;
 import com.kingpixel.cobbledailyrewards.database.DatabaseClientFactory;
 import com.kingpixel.cobbledailyrewards.managers.DailyRewardsManager;
+import com.kingpixel.cobbledailyrewards.models.UserInfo;
 import com.kingpixel.cobbledailyrewards.utils.UtilsLogger;
+import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.List;
 import java.util.concurrent.*;
@@ -48,8 +51,8 @@ public class CobbleDailyRewards {
 
 
   private static void files() {
-    language.init();
     config.init();
+    language.init();
   }
 
   private static void sign() {
@@ -79,6 +82,14 @@ public class CobbleDailyRewards {
     LifecycleEvent.SERVER_STOPPING.register(server -> {
       scheduledTasks.forEach(task -> task.cancel(true));
       scheduledTasks.clear();
+      scheduler.shutdown();
+      try {
+        if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+          scheduler.shutdownNow();
+        }
+      } catch (InterruptedException ex) {
+        scheduler.shutdownNow();
+      }
       LOGGER.info("CobbleDailyRewards has been stopped.");
     });
 
@@ -86,6 +97,7 @@ public class CobbleDailyRewards {
 
     PlayerEvent.PLAYER_JOIN.register(player -> {
       manager.init(player);
+      sendAlert(player);
     });
   }
 
@@ -97,12 +109,22 @@ public class CobbleDailyRewards {
     scheduledTasks.clear();
 
     ScheduledFuture<?> alertreward =
-      scheduler.scheduleAtFixedRate(() -> server.getPlayerManager().getPlayerList().forEach(player -> {
-
-      }), 0, CobbleDailyRewards.config.getCheckReward(), TimeUnit.MINUTES);
+      scheduler.scheduleAtFixedRate(() -> server.getPlayerManager().getPlayerList().forEach(CobbleDailyRewards::sendAlert), 0, CobbleDailyRewards.config.getCheckReward(), TimeUnit.MINUTES);
 
 
     scheduledTasks.add(alertreward);
   }
 
+  private static void sendAlert(ServerPlayerEntity player) {
+    UserInfo userInfo = DatabaseClientFactory.databaseClient.getUserInfo(player);
+    boolean someforclaim = userInfo.getCooldowns().values().stream().anyMatch(date -> date < System.currentTimeMillis());
+    if (someforclaim) {
+      player.sendMessage(
+        AdventureTranslator.toNative(
+          language.getMessageCanClaim()
+            .replace("%prefix%", language.getPrefix())
+        )
+      );
+    }
+  }
 }

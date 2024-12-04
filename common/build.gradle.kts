@@ -26,6 +26,7 @@ dependencies {
 
     // Database
     //api("org.mongodb:mongodb-driver-reactivestreams:5.1.2")
+    api("org.mongodb:mongodb-driver-sync:5.1.2")
 
     // Lombok
     annotationProcessor("org.projectlombok:lombok:1.18.20")

@@ -11,7 +11,7 @@
   },
   "entrypoints": {
     "main": [
-      "com.kingpixel.cobbledailyrewards.fabric.CobbleUtilsFabric"
+      "com.kingpixel.cobbledailyrewards.fabric.CobbleDailyRewardsFabric"
     ]
   },
   "license": "${license}",

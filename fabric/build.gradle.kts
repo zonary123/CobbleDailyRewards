@@ -38,6 +38,8 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
     modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_version")}")
 
+    shadowCommon("org.mongodb:mongodb-driver-sync:5.1.2")
+
     "common"(project(":common", "namedElements")) { isTransitive = false }
     "shadowCommon"(project(":common", "transformProductionFabric")) { isTransitive = false }
 }
@@ -78,6 +80,8 @@ tasks {
         exclude("org/intellij/**/*")
         exclude("org/jetbrains/**/*")
 
+        relocate("org.bson", "com.kingpixel.cobbledailyrewards.bson")
+        relocate("com.mongodb", "com.kingpixel.cobbledailyrewards.mongodb")
         transformers.add(ServiceFileTransformer())
 
         configurations = listOf(project.configurations.getByName("shadowCommon"))

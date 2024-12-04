@@ -11,6 +11,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,11 +23,17 @@ import java.util.UUID;
 @Getter
 @Setter
 @ToString
-public class UserInfo {
+public class UserInfo implements Serializable {
   private UUID uuid;
   private String name;
   // ID, Cooldown
-  private Map<String, Date> cooldowns;
+  private Map<String, Long> cooldowns;
+
+  public UserInfo() {
+    this.uuid = UUID.randomUUID();
+    this.name = "";
+    this.cooldowns = new HashMap<>();
+  }
 
   public UserInfo(ServerPlayerEntity player) {
     this.uuid = player.getUuid();
@@ -34,7 +41,7 @@ public class UserInfo {
     this.cooldowns = new HashMap<>();
   }
 
-  public UserInfo(UUID uuid, String name, Map<String, Date> cooldowns) {
+  public UserInfo(UUID uuid, String name, Map<String, Long> cooldowns) {
     this.uuid = uuid;
     this.name = name;
     this.cooldowns = cooldowns;

@@ -13,8 +13,7 @@ public class DatabaseClientFactory {
       databaseClient.disconnect();
     }
     switch (database.getType()) {
-      case MONGODB -> databaseClient = new MongoDBClient(database.getUrl(), database.getDatabase(), database.getUser(),
-        database.getPassword());
+      case MONGODB -> databaseClient = new MongoDBClient(database);
       case JSON -> databaseClient = new JSONClient(database.getUrl(), database.getUser(),
         database.getPassword());
       default -> databaseClient = new JSONClient(database.getUrl(), database.getUser(),

@@ -9,9 +9,8 @@ import com.kingpixel.cobbledailyrewards.database.DatabaseClientFactory;
 import com.kingpixel.cobbledailyrewards.models.UserInfo;
 import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.ItemModel;
-import com.kingpixel.cobbleutils.util.AdventureTranslator;
-import com.kingpixel.cobbleutils.util.LuckPermsUtil;
-import com.kingpixel.cobbleutils.util.PlayerUtils;
+import com.kingpixel.cobbleutils.util.*;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 
@@ -30,11 +29,11 @@ public class DailyRewardUI {
       .build();
 
     CobbleDailyRewards.config.getRewards().forEach(rewards -> {
+      if (!CobbleDailyRewards.config.isActive()) return;
       UserInfo userInfo = DatabaseClientFactory.databaseClient.getUserInfo(player);
-      Date cooldown = userInfo.getCooldowns().getOrDefault(rewards.getId(), new Date(1));
+      Date cooldown = new Date(userInfo.getCooldowns().getOrDefault(rewards.getId(), 1L));
       boolean isCooldown = DatabaseClientFactory.databaseClient.isCooldownActive(rewards, player);
       ItemModel item;
-      ItemModel itemModel = rewards.getWithCooldown();
       if (rewards.getPermission().isEmpty() || LuckPermsUtil.checkPermission(player, rewards.getPermission())) {
         if (isCooldown) {
           item = rewards.getWithCooldown();
@@ -44,9 +43,9 @@ public class DailyRewardUI {
       } else {
         item = CobbleDailyRewards.language.getNoPermission();
       }
-      String displayname = itemModel.getDisplayname()
+      String displayname = item.getDisplayname()
         .replace("%cooldown%", PlayerUtils.getCooldown(cooldown));
-      List<String> lore = new ArrayList<>(itemModel.getLore());
+      List<String> lore = new ArrayList<>(item.getLore());
       lore.replaceAll(s -> s
         .replace("%cooldown%", PlayerUtils.getCooldown(cooldown))
         .replace("%permission%", LuckPermsUtil.checkPermission(player, rewards.getPermission())
@@ -59,41 +58,62 @@ public class DailyRewardUI {
         .title(AdventureTranslator.toNative(displayname))
         .lore(Text.class, AdventureTranslator.toNativeL(lore))
         .onClick(action -> {
-          if (!LuckPermsUtil.checkPermission(action.getPlayer(), rewards.getPermission())) {
-            action.getPlayer().sendMessage(
-              AdventureTranslator.toNative(
-                CobbleDailyRewards.language.getMessageNotHavePermission()
-                  .replace("%prefix%", CobbleDailyRewards.language.getPrefix())
-              )
-            );
-            return;
-          }
-          if (DatabaseClientFactory.databaseClient.isCooldownActive(rewards, action.getPlayer())) {
-            action.getPlayer().sendMessage(
-              AdventureTranslator.toNative(
-                CobbleUtils.language.getMessageCooldown()
-                  .replace("%prefix%", CobbleDailyRewards.language.getPrefix())
-                  .replace("%cooldown%", PlayerUtils.getCooldown(DatabaseClientFactory
-                    .databaseClient.getUserInfo(player).getCooldowns().getOrDefault(
-                      rewards.getId(), new Date(1)
-                    ))
+          switch (action.getClickType()){
+            case LEFT_CLICK, SHIFT_LEFT_CLICK -> {
+              if (!rewards.getPermission().isEmpty()) {
+                if (!LuckPermsUtil.checkPermission(action.getPlayer(),
+                  rewards.getPermission())) {
+                  action.getPlayer().sendMessage(
+                    AdventureTranslator.toNative(
+                      CobbleDailyRewards.language.getMessageNotHavePermission()
+                        .replace("%prefix%", CobbleDailyRewards.language.getPrefix())
+                    )
+                  );
+                  return;
+                }
+              }
+
+              if (DatabaseClientFactory.databaseClient.isCooldownActive(rewards, action.getPlayer())) {
+                action.getPlayer().sendMessage(
+                  AdventureTranslator.toNative(
+                    CobbleUtils.language.getMessageCooldown()
+                      .replace("%prefix%", CobbleDailyRewards.language.getPrefix())
+                      .replace("%cooldown%", PlayerUtils.getCooldown(new Date(DatabaseClientFactory
+                        .databaseClient.getUserInfo(player).getCooldowns().getOrDefault(
+                          rewards.getId(), 1L
+                        )))
+                      )
                   )
-              )
-            );
-            return;
+                );
+                return;
+              }
+              rewards.getRewards().giveRewards(action.getPlayer());
+              DatabaseClientFactory.databaseClient.updateUserInfo(rewards, action.getPlayer());
+              UIManager.openUIForcefully(action.getPlayer(), getPage(action.getPlayer()));
+            }
+            case RIGHT_CLICK, SHIFT_RIGHT_CLICK, MIDDLE_CLICK -> rewards.getRewards().openMenu(action.getPlayer());
           }
-          rewards.giveReward(action.getPlayer());
-          DatabaseClientFactory.databaseClient.updateUserInfo(rewards, action.getPlayer());
-          UIManager.openUIForcefully(action.getPlayer(), getPage(action.getPlayer()));
         })
         .build();
       template.set(rewards.getSlot(), button);
     });
 
+    ItemStack itemStack = Utils.parseItemId(CobbleDailyRewards.language.getFill());
+
+    GooeyButton fill = GooeyButton.of(itemStack);
+    template.fill(fill);
+
+    GooeyButton close = UIUtils.getCloseButton(action -> {
+      UIManager.closeUI(action.getPlayer());
+    });
+
+    template.set((CobbleDailyRewards.config.getRows() * 9) - 5, close);
+
     GooeyPage page = GooeyPage.builder()
       .title(AdventureTranslator.toNative(CobbleDailyRewards.language.getTitlemenu()))
       .template(template)
       .build();
+
     /*page.subscribe(DatabaseClientFactory.databaseClient.getUserInfo(player), page1 -> {
       UIManager.openUIForcefully(player, page1);
     });*/
