@@ -2,6 +2,7 @@ package com.kingpixel.cobbledailyrewards.models;
 
 import com.google.gson.Gson;
 import com.kingpixel.cobbledailyrewards.managers.DailyRewardsManager;
+import com.kingpixel.cobbleutils.util.PlayerUtils;
 import com.kingpixel.cobbleutils.util.Utils;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Carlos Varas Alonso - 15/08/2024 17:03
@@ -60,5 +62,9 @@ public class UserInfo implements Serializable {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public void addCooldown(Rewards rewards, ServerPlayerEntity player) {
+    this.cooldowns.put(rewards.getId(), System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(PlayerUtils.getCooldown(rewards.getCooldowns(), rewards.getCooldown(), player)));
   }
 }

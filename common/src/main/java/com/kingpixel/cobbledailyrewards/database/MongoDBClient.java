@@ -92,7 +92,7 @@ public class MongoDBClient implements DatabaseClient {
       UserInfo userInfo = getUserInfo(player);
 
       // Actualizar la información de cooldowns
-      userInfo.getCooldowns().put(rewards.getId(), new Date().getTime() + TimeUnit.MINUTES.toMillis(rewards.getCooldown()));
+      userInfo.addCooldown(rewards, player);
 
       // Crear un documento de actualización
       Document updateDocument = new Document("$set", new Document("cooldowns", userInfo.getCooldowns()));
@@ -122,6 +122,14 @@ public class MongoDBClient implements DatabaseClient {
       mongoCollection.updateOne(Filters.eq("uuid", player.getUuid()), new Document("$set", new Document("cooldowns", userInfo.getCooldowns())));
     } catch (Exception e) {
       CobbleDailyRewards.LOGGER.error("Error restarting user info in MongoDB" + e);
+    }
+  }
+
+  @Override public void updateUserInfo(UserInfo userInfo) {
+    try {
+      mongoCollection.updateOne(Filters.eq("uuid", userInfo.getUuid()), new Document("$set", new Document("cooldowns", userInfo.getCooldowns())));
+    } catch (Exception e) {
+      CobbleDailyRewards.LOGGER.error("Error updating user info in MongoDB" + e);
     }
   }
 }

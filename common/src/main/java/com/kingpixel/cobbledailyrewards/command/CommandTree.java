@@ -34,9 +34,14 @@ public class CommandTree {
                     .replace("%prefix%", CobbleDailyRewards.language.getPrefix())
                   )
                 );
+              } else {
+                context.getSource().sendMessage(
+                  AdventureTranslator.toNative(CobbleDailyRewards.language.getMessageReload()
+                    .replace("%prefix%", CobbleDailyRewards.language.getPrefix())
+                  )
+                );
               }
               CobbleDailyRewards.load();
-
               return 1;
             })
         )

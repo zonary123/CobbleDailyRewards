@@ -6,6 +6,7 @@ import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.util.Utils;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Getter
@@ -28,7 +29,9 @@ public class Lang {
     this.prefix = "&8[&6CobbleDailyRewards&8] ";
     this.titlemenu = "&6Daily Rewards";
     this.messageReload = "%prefix% &aReloaded.";
-    this.noPermission = new ItemModel("minecraft:barrier");
+    this.noPermission = new ItemModel("minecraft:gray_dye", "&cNo Permission", List.of(
+      "<red>You do not have permission to claim this reward."
+    ));
     this.notHavePermission = "&cNot Permission";
     this.HavePermission = "&aHave Permission";
     this.fill = "minecraft:gray_stained_glass_pane";

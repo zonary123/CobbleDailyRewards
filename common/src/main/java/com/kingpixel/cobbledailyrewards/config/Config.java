@@ -46,23 +46,13 @@ public class Config {
     );
     this.rows = 3;
     this.checkReward = 15;
-    this.rewards = new ArrayList<>();
-    this.rewards.add(new Rewards());
   }
 
   public void init() {
     CompletableFuture<Boolean> futureRead = Utils.readFileAsync(CobbleDailyRewards.PATH, "config.json",
       el -> {
         Gson gson = Utils.newGson();
-        Config config = gson.fromJson(el, Config.class);
-        this.debug = config.isDebug();
-        this.lang = config.getLang();
-        this.active = config.isActive();
-        this.database = config.getDatabase();
-        this.rows = config.getRows();
-        this.commands = config.getCommands();
-        this.checkReward = config.getCheckReward();
-        this.rewards = config.getRewards();
+        CobbleDailyRewards.config = gson.fromJson(el, Config.class);
         String data = gson.toJson(this);
         CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleDailyRewards.PATH, "config.json",
           data);
@@ -81,6 +71,17 @@ public class Config {
       if (!futureWrite.join()) {
         CobbleDailyRewards.LOGGER.fatal("Could not write config.json file for " + CobbleDailyRewards.MOD_NAME + ".");
       }
+    }
+
+
+    if (CobbleDailyRewards.config.getRewards() != null && !CobbleDailyRewards.config.getRewards().isEmpty()) {
+      for (Rewards reward : CobbleDailyRewards.config.getRewards()) {
+        CompletableFuture<Boolean> futureWriteRewards = Utils.writeFileAsync(CobbleDailyRewards.PATH_REWARDS, reward.getId() + ".json", Utils.newGson().toJson(reward));
+        if (!futureWriteRewards.join()) {
+          CobbleDailyRewards.LOGGER.fatal("Could not write rewards.json file for " + CobbleDailyRewards.MOD_NAME + ".");
+        }
+      }
+      rewards.clear();
     }
 
   }

@@ -21,4 +21,6 @@ public interface DatabaseClient {
   void save();
 
   void restart(ServerPlayerEntity player);
+
+  void updateUserInfo(UserInfo userInfo);
 }
