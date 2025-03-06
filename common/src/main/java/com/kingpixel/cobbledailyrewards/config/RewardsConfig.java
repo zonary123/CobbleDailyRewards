@@ -25,7 +25,7 @@ public class RewardsConfig {
     }
     File[] files = folder.listFiles();
 
-    if (files == null) {
+    if (files == null || files.length == 0) {
       CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleDailyRewards.PATH_REWARDS, "default.json",
         Utils.newGson().toJson(new Rewards()));
       if (!futureWrite.join()) {

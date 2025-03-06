@@ -16,6 +16,8 @@ public class DatabaseClientFactory {
       case MONGODB -> databaseClient = new MongoDBClient(database);
       case JSON -> databaseClient = new JSONClient(database.getUrl(), database.getUser(),
         database.getPassword());
+      case SQLITE -> databaseClient = new SQLiteClient(database);
+      case MYSQL -> databaseClient = new MySQLClient(database);
       default -> databaseClient = new JSONClient(database.getUrl(), database.getUser(),
         database.getPassword());
     }

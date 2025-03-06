@@ -53,7 +53,7 @@ public class Config {
       el -> {
         Gson gson = Utils.newGson();
         CobbleDailyRewards.config = gson.fromJson(el, Config.class);
-        String data = gson.toJson(this);
+        String data = gson.toJson(CobbleDailyRewards.config);
         CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleDailyRewards.PATH, "config.json",
           data);
         if (!futureWrite.join()) {
@@ -64,7 +64,8 @@ public class Config {
     if (!futureRead.join()) {
       CobbleDailyRewards.LOGGER.info("No config.json file found for" + CobbleDailyRewards.MOD_NAME + ". Attempting to generate one.");
       Gson gson = Utils.newGson();
-      String data = gson.toJson(this);
+      CobbleDailyRewards.config = this;
+      String data = gson.toJson(CobbleDailyRewards.config);
       CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleDailyRewards.PATH, "config.json",
         data);
 

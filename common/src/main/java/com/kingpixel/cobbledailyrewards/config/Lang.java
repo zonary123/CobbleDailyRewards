@@ -48,19 +48,8 @@ public class Lang {
       CobbleDailyRewards.config.getLang() + ".json",
       el -> {
         Gson gson = Utils.newGson();
-        Lang lang = gson.fromJson(el, Lang.class);
-        this.prefix = lang.getPrefix();
-        this.titlemenu = lang.getTitlemenu();
-        this.messageReload = lang.getMessageReload();
-        this.noPermission = lang.getNoPermission();
-        this.fill = lang.getFill();
-        this.notHavePermission = lang.getNotHavePermission();
-        this.HavePermission = lang.getHavePermission();
-        this.messageHavePermission = lang.getMessageHavePermission();
-        this.messageNotHavePermission = lang.getMessageNotHavePermission();
-        this.messageCanClaim = lang.getMessageCanClaim();
-
-        String data = gson.toJson(this);
+        CobbleDailyRewards.language = gson.fromJson(el, Lang.class);
+        String data = gson.toJson(CobbleDailyRewards.language);
         CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleDailyRewards.PATH_LANG, CobbleDailyRewards.config.getLang() +
             ".json",
           data);
@@ -72,7 +61,8 @@ public class Lang {
     if (!futureRead.join()) {
       CobbleDailyRewards.LOGGER.info("No lang.json file found for" + CobbleDailyRewards.MOD_NAME + ". Attempting to generate one.");
       Gson gson = Utils.newGson();
-      String data = gson.toJson(this);
+      CobbleDailyRewards.language = this;
+      String data = gson.toJson(CobbleDailyRewards.language);
       CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleDailyRewards.PATH_LANG, CobbleDailyRewards.config.getLang() +
           ".json",
         data);

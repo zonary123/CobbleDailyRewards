@@ -30,8 +30,7 @@ public class JSONClient implements DatabaseClient {
 
   @Override public void updateUserInfo(Rewards rewards, ServerPlayerEntity player) {
     UserInfo userInfo = getUserInfo(player);
-    userInfo.addCooldown(rewards,player);
-    CobbleDailyRewards.manager.getUserInfoMap().put(player.getUuid(), userInfo);
+    userInfo.addCooldown(rewards, player);
     userInfo.writeInfo(player.getUuid());
   }
 
@@ -47,12 +46,10 @@ public class JSONClient implements DatabaseClient {
   @Override public void restart(ServerPlayerEntity player) {
     UserInfo userInfo = getUserInfo(player);
     userInfo.getCooldowns().clear();
-    CobbleDailyRewards.manager.getUserInfoMap().put(player.getUuid(), userInfo);
     userInfo.writeInfo(player.getUuid());
   }
 
   @Override public void updateUserInfo(UserInfo userInfo) {
-    CobbleDailyRewards.manager.getUserInfoMap().put(userInfo.getUuid(), userInfo);
     userInfo.writeInfo(userInfo.getUuid());
   }
 }
