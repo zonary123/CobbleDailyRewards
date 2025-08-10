@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Carlos Varas Alonso - 02/08/2024 12:23
@@ -33,15 +34,25 @@ public class DailyRewardRestartCommand implements Command<ServerCommandSource> {
             .requires(source -> LuckPermsUtil.checkPermission(source, 2, List.of("cobbledailyrewards.restart", "cobbledailyrewards.admin")))
             .executes(context -> {
               if (!CobbleDailyRewards.config.isActive()) return 0;
-              ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
-              DatabaseClientFactory.databaseClient.restart(player);
+              ServerPlayerEntity player = context.getSource().getPlayer();
+              if (player == null) return 0;
+              CompletableFuture.runAsync(() -> {
+                  DatabaseClientFactory.databaseClient.restart(player);
+                }, CobbleDailyRewards.EXECUTOR_DAILY_REWARDS)
+                .exceptionally(e -> {
+                  e.printStackTrace();
+                  return null;
+                });
               return 1;
             }).then(
               CommandManager.argument("player", EntityArgumentType.players())
                 .executes(context -> {
                   if (!CobbleDailyRewards.config.isActive()) return 0;
                   ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
-                  DatabaseClientFactory.databaseClient.restart(player);
+                  if (player == null) return 0;
+                  CompletableFuture.runAsync(() -> {
+                    DatabaseClientFactory.databaseClient.restart(player);
+                  }, CobbleDailyRewards.EXECUTOR_DAILY_REWARDS);
                   return 1;
                 })
             )

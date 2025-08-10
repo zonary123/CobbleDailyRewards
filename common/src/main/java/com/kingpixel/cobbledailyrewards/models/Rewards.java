@@ -52,6 +52,29 @@ public class Rewards {
 
   }
 
+  public void check() {
+    if (this.cooldown == null) {
+      this.cooldown = 1440;
+    }
+    if (this.cooldowns == null) {
+      this.cooldowns = new HashMap<>();
+      cooldowns.put("", cooldown);
+    }
+    if (this.permission == null) {
+      this.permission = "";
+    }
+    if (this.withoutCooldown == null) {
+      this.withoutCooldown = new ItemModel("minecraft:chest_minecart", "<green>Default Reward", List.of(
+        "Cooldown: <red>%cooldown%",
+        "Permission: <red>%permission%"));
+    }
+    if (this.withCooldown == null) {
+      this.withCooldown = new ItemModel("minecraft:minecart", "<green>Default Reward", List.of(
+        "Cooldown: <red>%cooldown%",
+        "Permission: <red>%permission%"));
+    }
+  }
+
   public long getCalculteCooldown(ServerPlayerEntity player) {
     return PlayerUtils.getCooldown(cooldowns, cooldown, player);
   }

@@ -9,9 +9,8 @@ public class DatabaseClientFactory {
   public static DatabaseClient databaseClient;
 
   public static void createDatabaseClient(DataBaseConfig database) {
-    if (databaseClient != null) {
-      databaseClient.disconnect();
-    }
+    if (databaseClient != null) databaseClient.disconnect();
+
     switch (database.getType()) {
       case MONGODB -> databaseClient = new MongoDBClient(database);
       case JSON -> databaseClient = new JSONClient(database.getUrl(), database.getUser(),

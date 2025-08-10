@@ -40,7 +40,9 @@ public class RewardsConfig {
           call -> {
             Rewards reward = Utils.newGson().fromJson(call, Rewards.class);
             reward.setId(file.getName().replace(".json", ""));
+            reward.check();
             rewards.add(reward);
+            Utils.writeFileSync(file, Utils.newGson().toJson(reward));
           });
         if (!futureRead.join()) {
           CobbleDailyRewards.LOGGER.fatal("Could not read " + file.getName() + " file for " + CobbleDailyRewards.MOD_NAME + ".");

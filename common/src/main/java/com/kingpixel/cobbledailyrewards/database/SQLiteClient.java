@@ -1,8 +1,10 @@
 package com.kingpixel.cobbledailyrewards.database;
 
 import com.google.gson.reflect.TypeToken;
+import com.kingpixel.cobbledailyrewards.CobbleDailyRewards;
 import com.kingpixel.cobbledailyrewards.models.Rewards;
 import com.kingpixel.cobbledailyrewards.models.UserInfo;
+import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.DataBaseConfig;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
 import com.kingpixel.cobbleutils.util.Utils;
@@ -15,7 +17,7 @@ import java.util.Map;
 /**
  * Implementación de SQLiteClient para la interfaz DatabaseClient.
  */
-public class SQLiteClient implements DatabaseClient {
+public class SQLiteClient extends DatabaseClient {
   private String path;
   private Connection connection;
 
@@ -40,6 +42,15 @@ public class SQLiteClient implements DatabaseClient {
 
   @Override
   public UserInfo getUserInfo(ServerPlayerEntity player) {
+    UserInfo userInfo;
+    if (CobbleDailyRewards.userInfoMap.containsKey(player.getUuid())) {
+      userInfo = CobbleDailyRewards.userInfoMap.get(player.getUuid());
+      if (userInfo != null) {
+        return userInfo;
+      } else {
+        CobbleUtils.LOGGER.error("UserInfo is null for player: " + player.getGameProfile().getName() + " UUID: " + player.getUuid());
+      }
+    }
     String uuid = player.getUuid().toString();
     try (PreparedStatement stmt = connection.prepareStatement("SELECT cooldowns FROM user_info WHERE uuid = ?")) {
       stmt.setString(1, uuid);
@@ -48,12 +59,17 @@ public class SQLiteClient implements DatabaseClient {
         String cooldownsJson = rs.getString("cooldowns");
         Map<String, Long> cooldowns = Utils.newGson().fromJson(cooldownsJson, new TypeToken<HashMap<String, Long>>() {
         }.getType());
-        return new UserInfo(player.getUuid(), player.getGameProfile().getName(), cooldowns);
+        userInfo = new UserInfo(player.getUuid(), player.getGameProfile().getName(), cooldowns);
+        CobbleDailyRewards.userInfoMap.put(player.getUuid(), userInfo);
+        return userInfo;
       }
     } catch (SQLException e) {
       e.printStackTrace();
     }
-    return new UserInfo(player);
+    userInfo = new UserInfo(player);
+    CobbleDailyRewards.userInfoMap.put(player.getUuid(), userInfo);
+    updateUserInfo(userInfo);
+    return userInfo;
   }
 
   @Override

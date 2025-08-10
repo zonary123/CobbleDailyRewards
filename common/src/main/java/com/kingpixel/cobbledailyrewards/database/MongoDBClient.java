@@ -3,9 +3,11 @@ package com.kingpixel.cobbledailyrewards.database;
 import com.kingpixel.cobbledailyrewards.CobbleDailyRewards;
 import com.kingpixel.cobbledailyrewards.models.Rewards;
 import com.kingpixel.cobbledailyrewards.models.UserInfo;
+import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.DataBaseConfig;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
 import com.kingpixel.cobbleutils.util.PokemonUtils;
+import com.mojang.datafixers.kinds.IdF;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
@@ -25,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
-public class MongoDBClient implements DatabaseClient {
+public class MongoDBClient extends DatabaseClient {
   private MongoCollection<UserInfo> mongoCollection;
   private MongoClient mongoClient;
 
@@ -63,12 +65,22 @@ public class MongoDBClient implements DatabaseClient {
   }
 
   @Override public UserInfo getUserInfo(ServerPlayerEntity player) {
+    UserInfo userInfo = null;
+    if (CobbleDailyRewards.userInfoMap.containsKey(player.getUuid())) {
+      userInfo = CobbleDailyRewards.userInfoMap.get(player.getUuid());
+      if (userInfo != null) {
+        return userInfo;
+      } else {
+        CobbleUtils.LOGGER.error("UserInfo is null for player: " + player.getGameProfile().getName() + " UUID: " + player.getUuid());
+      }
+    }
     try {
-      UserInfo userInfo = mongoCollection.find(Filters.eq("uuid", player.getUuid())).first();
+      userInfo = mongoCollection.find(Filters.eq("uuid", player.getUuid())).first();
       if (userInfo == null) {
         userInfo = new UserInfo(player);
         mongoCollection.insertOne(userInfo);
       }
+      CobbleDailyRewards.userInfoMap.put(player.getUuid(), userInfo);
       return userInfo;
     } catch (Exception e) {
       CobbleDailyRewards.LOGGER.error("Error getting user info from MongoDB" + e);

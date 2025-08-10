@@ -1,5 +1,6 @@
 package com.kingpixel.cobbledailyrewards.database;
 
+import com.kingpixel.cobbledailyrewards.CobbleDailyRewards;
 import com.kingpixel.cobbledailyrewards.models.Rewards;
 import com.kingpixel.cobbledailyrewards.models.UserInfo;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -7,20 +8,23 @@ import net.minecraft.server.network.ServerPlayerEntity;
 /**
  * @author Carlos Varas Alonso - 24/07/2024 21:02
  */
-public interface DatabaseClient {
-  void connect();
+public abstract class DatabaseClient {
+  abstract void connect();
 
-  UserInfo getUserInfo(ServerPlayerEntity player);
+  public abstract UserInfo getUserInfo(ServerPlayerEntity player);
 
-  boolean isCooldownActive(Rewards rewards, ServerPlayerEntity player);
+  public abstract boolean isCooldownActive(Rewards rewards, ServerPlayerEntity player);
 
-  void updateUserInfo(Rewards rewards, ServerPlayerEntity player);
+  public abstract void updateUserInfo(Rewards rewards, ServerPlayerEntity player);
 
-  void disconnect();
+  void disconnect() {
+    CobbleDailyRewards.userInfoMap.clear();
+  }
 
-  void save();
+  public abstract void save();
 
-  void restart(ServerPlayerEntity player);
+  public abstract void restart(ServerPlayerEntity player);
 
-  void updateUserInfo(UserInfo userInfo);
+  public abstract void updateUserInfo(UserInfo userInfo);
+
 }

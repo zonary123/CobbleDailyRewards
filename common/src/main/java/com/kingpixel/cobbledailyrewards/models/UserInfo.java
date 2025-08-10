@@ -1,7 +1,7 @@
 package com.kingpixel.cobbledailyrewards.models;
 
 import com.google.gson.Gson;
-import com.kingpixel.cobbledailyrewards.managers.DailyRewardsManager;
+import com.kingpixel.cobbledailyrewards.CobbleDailyRewards;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
 import com.kingpixel.cobbleutils.util.Utils;
 import lombok.Getter;
@@ -50,7 +50,7 @@ public class UserInfo implements Serializable {
   }
 
   public void writeInfo(UUID uuid) {
-    File dir = Utils.getAbsolutePath(DailyRewardsManager.PATH_USER_INFO);
+    File dir = Utils.getAbsolutePath(CobbleDailyRewards.PATH_DATA);
     if (!dir.exists()) {
       dir.mkdirs(); // Crea el directorio si no existe
     }
