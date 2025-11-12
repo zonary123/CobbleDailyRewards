@@ -17,8 +17,7 @@ dependencies {
     modImplementation("ca.landonjw.gooeylibs:fabric-api-repack:${property("gooeylibs_version")}")
 
     // Database
-    api("org.mongodb:mongodb-driver-sync:${property("mongodb_version")}")
-
+    implementation("org.mongodb:mongodb-driver-sync:5.6.1")
     // Lombok
     annotationProcessor("org.projectlombok:lombok:${property("lombok_version")}")
     implementation("org.projectlombok:lombok:${property("lombok_version")}")
@@ -32,7 +31,7 @@ dependencies {
     api("club.minnced:discord-webhooks:${property("discord_webhooks_version")}")
     api("net.objecthunter:exp4j:0.4.8")
 
-    modImplementation(files("libs/CobbleUtils-common-1.1.3.jar"))
+    modImplementation(fileTree("libs") { include("*.jar") })
 }
 
 

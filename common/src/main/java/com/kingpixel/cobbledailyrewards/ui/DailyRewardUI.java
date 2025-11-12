@@ -84,10 +84,7 @@ public class DailyRewardUI {
                       return;
                     }
                     DatabaseClientFactory.databaseClient.updateUserInfo(reward, action.getPlayer());
-                    open(action.getPlayer());
-                    CobbleDailyRewards.server.executeSync(() -> {
-                      reward.getRewards().giveRewards(action.getPlayer());
-                    });
+                    reward.getRewards().giveRewards(action.getPlayer());
                   }
                   case RIGHT_CLICK, SHIFT_RIGHT_CLICK -> {
                     reward.getRewards().openMenu(player, chestTemplate -> {
