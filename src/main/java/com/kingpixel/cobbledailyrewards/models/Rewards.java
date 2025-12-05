@@ -1,6 +1,7 @@
 package com.kingpixel.cobbledailyrewards.models;
 
 import com.kingpixel.cobbleutils.Model.AdvancedItemChance;
+import com.kingpixel.cobbleutils.Model.DurationValue;
 import com.kingpixel.cobbleutils.Model.ItemChance;
 import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.util.LuckPermsUtil;
@@ -27,8 +28,8 @@ import java.util.Map;
 public class Rewards {
   private String id;
   private short slot;
-  private Integer cooldown;
-  private Map<String, Integer> cooldowns;
+  private DurationValue cooldown;
+  private Map<String, DurationValue> cooldowns;
   private String permission;
   private ItemModel withoutCooldown;
   private ItemModel withCooldown;
@@ -37,10 +38,10 @@ public class Rewards {
   public Rewards() {
     this.id = "Default";
     this.slot = 0;
-    this.cooldown = 1440;
+    this.cooldown = DurationValue.parse("24h");
     this.cooldowns = new HashMap<>();
     cooldowns.put("", cooldown);
-    cooldowns.put("group.vip", 720);
+    cooldowns.put("group.vip", DurationValue.parse("12h"));
     this.permission = "";
     this.withoutCooldown = new ItemModel("minecraft:chest_minecart", "<green>Default Reward", List.of(
       "Cooldown: <red>%cooldown%",
@@ -54,7 +55,7 @@ public class Rewards {
 
   public void check() {
     if (this.cooldown == null) {
-      this.cooldown = 1440;
+      this.cooldown = DurationValue.parse("1d");
     }
     if (this.cooldowns == null) {
       this.cooldowns = new HashMap<>();
@@ -75,7 +76,7 @@ public class Rewards {
     }
   }
 
-  public long getCalculteCooldown(ServerPlayerEntity player) {
+  public long getCalculateCooldown(ServerPlayerEntity player) {
     return PlayerUtils.getCooldown(cooldowns, cooldown, player);
   }
 }

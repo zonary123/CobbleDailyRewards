@@ -13,11 +13,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Carlos Varas Alonso - 15/08/2024 17:03
@@ -65,6 +63,6 @@ public class UserInfo implements Serializable {
   }
 
   public void addCooldown(Rewards rewards, ServerPlayerEntity player) {
-    this.cooldowns.put(rewards.getId(), System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(PlayerUtils.getCooldown(rewards.getCooldowns(), rewards.getCooldown(), player)));
+    this.cooldowns.put(rewards.getId(), System.currentTimeMillis() + PlayerUtils.getCooldown(rewards.getCooldowns(), rewards.getCooldown(), player));
   }
 }

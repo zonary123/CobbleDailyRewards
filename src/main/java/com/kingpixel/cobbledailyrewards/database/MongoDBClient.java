@@ -6,8 +6,6 @@ import com.kingpixel.cobbledailyrewards.models.UserInfo;
 import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.DataBaseConfig;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
-import com.kingpixel.cobbleutils.util.PokemonUtils;
-import com.mojang.datafixers.kinds.IdF;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
@@ -20,9 +18,6 @@ import org.bson.Document;
 import org.bson.UuidRepresentation;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
-
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;

@@ -1,10 +1,8 @@
 package com.kingpixel.cobbledailyrewards.command.base;
 
-import ca.landonjw.gooeylibs2.api.UIManager;
 import com.kingpixel.cobbledailyrewards.CobbleDailyRewards;
 import com.kingpixel.cobbledailyrewards.ui.DailyRewardUI;
 import com.kingpixel.cobbleutils.api.PermissionApi;
-import com.kingpixel.cobbleutils.util.LuckPermsUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;

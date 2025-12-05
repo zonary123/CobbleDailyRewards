@@ -6,7 +6,6 @@ import com.kingpixel.cobbledailyrewards.command.CommandTree;
 import com.kingpixel.cobbledailyrewards.config.Config;
 import com.kingpixel.cobbledailyrewards.config.Lang;
 import com.kingpixel.cobbledailyrewards.config.RewardsConfig;
-import com.kingpixel.cobbledailyrewards.database.DatabaseClient;
 import com.kingpixel.cobbledailyrewards.database.DatabaseClientFactory;
 import com.kingpixel.cobbledailyrewards.models.Rewards;
 import com.kingpixel.cobbledailyrewards.models.UserInfo;
