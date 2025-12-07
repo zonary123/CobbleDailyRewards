@@ -14,6 +14,7 @@ import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
+import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -25,7 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class CobbleDailyRewards {
+public class CobbleDailyRewards implements ModInitializer {
   public static final String MOD_ID = "cobbledailyrewards";
   public static final String MOD_NAME = "CobbleDailyRewards";
   public static final String PATH = "/config/cobbledailyrewards";
@@ -46,7 +47,7 @@ public class CobbleDailyRewards {
   // Manager
   public static Task taskAlert;
 
-  public static void init() {
+  @Override public void onInitialize() {
     events();
   }
 
@@ -141,4 +142,5 @@ public class CobbleDailyRewards {
       );
     }
   }
+
 }

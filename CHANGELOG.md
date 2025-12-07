@@ -8,7 +8,7 @@
 
 ### Bug Fixes
 
-- No bug fixes in this release.
+- Fix mod not initializing correctly.
 
 ### Optimizations
 
