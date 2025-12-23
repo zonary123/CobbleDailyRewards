@@ -1,15 +1,15 @@
 # Changelog
 
-## [1.1.3] - 2025-12-03
+## [1.1.4] - 2025-12-03
 
 ### Features
 
-- Cooldown variable now support this format: "1d2h30m15s" for better readability.
+- N\A
 
 ### Bug Fixes
 
-- Fix mod not initializing correctly.
+- Fix rewards can claimed without wait when the player is new to the server.
 
 ### Optimizations
 
-- No optimizations in this release.
+- N\A

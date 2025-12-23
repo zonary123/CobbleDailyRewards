@@ -65,4 +65,11 @@ public class UserInfo implements Serializable {
   public void addCooldown(Rewards rewards, ServerPlayerEntity player) {
     this.cooldowns.put(rewards.getId(), System.currentTimeMillis() + PlayerUtils.getCooldown(rewards.getCooldowns(), rewards.getCooldown(), player));
   }
+
+  public void fix(ServerPlayerEntity player) {
+    var rewards = CobbleDailyRewards.rewardsConfig.getRewards();
+    for (Rewards reward : rewards) {
+      if (!this.cooldowns.containsKey(reward.getId())) addCooldown(reward, player);
+    }
+  }
 }

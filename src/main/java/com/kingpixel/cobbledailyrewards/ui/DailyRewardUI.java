@@ -32,7 +32,7 @@ public class DailyRewardUI {
         CobbleDailyRewards.rewardsConfig.getRewards().forEach(reward -> {
           if (!CobbleDailyRewards.config.isActive()) return;
           UserInfo userInfo = DatabaseClientFactory.databaseClient.getUserInfo(player);
-          Date cooldown = new Date(userInfo.getCooldowns().getOrDefault(reward.getId(), 1L));
+          long cooldown = userInfo.getCooldowns().getOrDefault(reward.getId(), 1L);
           boolean isCooldown = DatabaseClientFactory.databaseClient.isCooldownActive(reward, player);
           ItemModel item;
           if (reward.getPermission().isEmpty() || LuckPermsUtil.checkPermission(player, reward.getPermission())) {
@@ -72,12 +72,12 @@ public class DailyRewardUI {
                     if (DatabaseClientFactory.databaseClient.isCooldownActive(reward, action.getPlayer())) {
                       action.getPlayer().sendMessage(
                         AdventureTranslator.toNative(
-                          CobbleUtils.language.getMessageCooldown()
+                          CobbleDailyRewards.language.getCooldown()
                             .replace("%prefix%", CobbleDailyRewards.language.getPrefix())
-                            .replace("%cooldown%", PlayerUtils.getCooldown(new Date(DatabaseClientFactory
+                            .replace("%cooldown%", PlayerUtils.getCooldown(DatabaseClientFactory
                               .databaseClient.getUserInfo(player).getCooldowns().getOrDefault(
                                 reward.getId(), 1L
-                              )))
+                              ))
                             )
                         )
                       );

@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public class Lang {
   private String prefix;
+  private String cooldown;
   private String titlemenu;
   private String messageReload;
   private String notHavePermission;
@@ -27,6 +28,7 @@ public class Lang {
    */
   public Lang() {
     this.prefix = "&8[&6CobbleDailyRewards&8] ";
+    this.cooldown = "%prefix% &cYou have to wait %cooldown% to claim this reward again.";
     this.titlemenu = "&6Daily Rewards";
     this.messageReload = "%prefix% &aReloaded.";
     this.noPermission = new ItemModel("minecraft:gray_dye", "&cNo Permission", List.of(

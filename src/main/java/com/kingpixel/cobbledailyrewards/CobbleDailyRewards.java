@@ -25,6 +25,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class CobbleDailyRewards implements ModInitializer {
   public static final String MOD_ID = "cobbledailyrewards";
@@ -40,7 +41,7 @@ public class CobbleDailyRewards implements ModInitializer {
   public static Lang language = new Lang();
   public static RewardsConfig rewardsConfig = new RewardsConfig();
   public static Map<UUID, UserInfo> userInfoMap = new HashMap<>();
-  public static ExecutorService EXECUTOR_DAILY_REWARDS = Executors.newFixedThreadPool(4, new ThreadFactoryBuilder()
+  public static final ExecutorService EXECUTOR_DAILY_REWARDS = Executors.newFixedThreadPool(4, new ThreadFactoryBuilder()
     .setDaemon(true)
     .setNameFormat("CobbleDailyRewards-Executor-%d")
     .build());
@@ -94,19 +95,24 @@ public class CobbleDailyRewards implements ModInitializer {
 
     LifecycleEvent.SERVER_LEVEL_LOAD.register(level -> server = level.getServer());
 
-    PlayerEvent.PLAYER_JOIN.register(player -> {
-      CompletableFuture.runAsync(() -> {
-        UserInfo userInfo = DatabaseClientFactory.databaseClient.getUserInfo(player);
-        boolean update = false;
-        for (Rewards reward : rewardsConfig.getRewards()) {
-          if (userInfo.getCooldowns().containsKey(reward.getId())) return;
-          userInfo.addCooldown(reward, player);
-          update = true;
-        }
-        if (update) DatabaseClientFactory.databaseClient.updateUserInfo(userInfo);
-        sendAlert(player);
-      }, EXECUTOR_DAILY_REWARDS);
-    });
+    PlayerEvent.PLAYER_JOIN.register(player -> CompletableFuture.runAsync(() -> {
+          UserInfo userInfo = DatabaseClientFactory.databaseClient.getUserInfo(player);
+          boolean update = false;
+          for (Rewards reward : rewardsConfig.getRewards()) {
+            if (userInfo.getCooldowns().containsKey(reward.getId())) return;
+            userInfo.addCooldown(reward, player);
+            update = true;
+          }
+          userInfo.fix(player);
+          if (update) DatabaseClientFactory.databaseClient.updateUserInfo(userInfo);
+          sendAlert(player);
+        }, EXECUTOR_DAILY_REWARDS)
+        .orTimeout(5, TimeUnit.SECONDS)
+        .exceptionally(e -> {
+          LOGGER.warn("Failed to load user info for player " + player.getGameProfile().getName() + ": " + e.getMessage());
+          return null;
+        })
+    );
 
     PlayerEvent.PLAYER_QUIT.register(player -> userInfoMap.remove(player.getUuid()));
   }
@@ -116,14 +122,12 @@ public class CobbleDailyRewards implements ModInitializer {
     if (taskAlert != null) taskAlert.setExpired();
 
     taskAlert = Task.builder()
-      .execute(() -> {
-        CompletableFuture.runAsync(() -> {
-          List<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
-          for (ServerPlayerEntity player : players) {
-            sendAlert(player);
-          }
-        }, EXECUTOR_DAILY_REWARDS);
-      })
+      .execute(() -> CompletableFuture.runAsync(() -> {
+        List<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
+        for (ServerPlayerEntity player : players) {
+          sendAlert(player);
+        }
+      }, EXECUTOR_DAILY_REWARDS))
       .interval(20L * 60 * config.getCheckReward())
       .infinite()
       .build();
