@@ -2,21 +2,17 @@ package com.kingpixel.cobbledailyrewards.models;
 
 import com.kingpixel.cobbleutils.Model.AdvancedItemChance;
 import com.kingpixel.cobbleutils.Model.DurationValue;
-import com.kingpixel.cobbleutils.Model.ItemChance;
 import com.kingpixel.cobbleutils.Model.ItemModel;
-import com.kingpixel.cobbleutils.util.LuckPermsUtil;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import net.minecraft.advancement.AdvancementRewards;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Carlos Varas Alonso - 14/08/2024 22:44
@@ -39,7 +35,7 @@ public class Rewards {
     this.id = "Default";
     this.slot = 0;
     this.cooldown = DurationValue.parse("24h");
-    this.cooldowns = new HashMap<>();
+    this.cooldowns = new ConcurrentHashMap<>();
     cooldowns.put("", cooldown);
     cooldowns.put("group.vip", DurationValue.parse("12h"));
     this.permission = "";
@@ -50,7 +46,13 @@ public class Rewards {
       "Cooldown: <red>%cooldown%",
       "Permission: <red>%permission%"));
     this.rewards = new AdvancedItemChance();
+  }
 
+  public Map<String, DurationValue> getCooldowns() {
+    if (this.cooldowns == null) {
+      this.cooldowns = new ConcurrentHashMap<>();
+    }
+    return this.cooldowns;
   }
 
   public void check() {
@@ -58,7 +60,7 @@ public class Rewards {
       this.cooldown = DurationValue.parse("1d");
     }
     if (this.cooldowns == null) {
-      this.cooldowns = new HashMap<>();
+      this.cooldowns = new ConcurrentHashMap<>();
       cooldowns.put("", cooldown);
     }
     if (this.permission == null) {
@@ -77,6 +79,6 @@ public class Rewards {
   }
 
   public long getCalculateCooldown(ServerPlayerEntity player) {
-    return PlayerUtils.getCooldown(cooldowns, cooldown, player);
+    return PlayerUtils.getCooldown(getCooldowns(), cooldown, player);
   }
 }

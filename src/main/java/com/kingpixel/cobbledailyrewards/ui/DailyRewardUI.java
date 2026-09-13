@@ -7,15 +7,17 @@ import ca.landonjw.gooeylibs2.api.template.types.ChestTemplate;
 import com.kingpixel.cobbledailyrewards.CobbleDailyRewards;
 import com.kingpixel.cobbledailyrewards.database.DatabaseClientFactory;
 import com.kingpixel.cobbledailyrewards.models.UserInfo;
-import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.api.PermissionApi;
-import com.kingpixel.cobbleutils.util.*;
+import com.kingpixel.cobbleutils.util.AdventureTranslator;
+import com.kingpixel.cobbleutils.util.LuckPermsUtil;
+import com.kingpixel.cobbleutils.util.PlayerUtils;
+import com.kingpixel.cobbleutils.util.UIUtils;
+import com.kingpixel.cobbleutils.util.Utils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -84,11 +86,20 @@ public class DailyRewardUI {
                       return;
                     }
                     DatabaseClientFactory.databaseClient.updateUserInfo(reward, action.getPlayer());
-                    reward.getRewards().giveRewards(action.getPlayer());
+                    if (CobbleDailyRewards.server != null) {
+                      CobbleDailyRewards.server.execute(() -> reward.getRewards().giveRewards(action.getPlayer()));
+                    } else {
+                      reward.getRewards().giveRewards(action.getPlayer());
+                    }
                   }
                   case RIGHT_CLICK, SHIFT_RIGHT_CLICK -> {
-                    reward.getRewards().openMenu(player, chestTemplate -> {
-                    }, close -> open(player));
+                    if (CobbleDailyRewards.server != null) {
+                      CobbleDailyRewards.server.execute(() -> reward.getRewards().openMenu(player, chestTemplate -> {
+                      }, close -> open(player)));
+                    } else {
+                      reward.getRewards().openMenu(player, chestTemplate -> {
+                      }, close -> open(player));
+                    }
                   }
                 }
               }, CobbleDailyRewards.EXECUTOR_DAILY_REWARDS)
@@ -115,7 +126,11 @@ public class DailyRewardUI {
           .template(template)
           .build();
 
-        UIManager.openUIForcefully(player, page);
+        if (CobbleDailyRewards.server != null) {
+          CobbleDailyRewards.server.execute(() -> UIManager.openUIForcefully(player, page));
+        } else {
+          UIManager.openUIForcefully(player, page);
+        }
       }, CobbleDailyRewards.EXECUTOR_DAILY_REWARDS)
       .exceptionally(e -> {
         e.printStackTrace();

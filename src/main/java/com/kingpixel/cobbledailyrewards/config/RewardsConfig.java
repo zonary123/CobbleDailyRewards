@@ -9,16 +9,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author Carlos Varas Alonso - 12/01/2025 6:57
  */
 @Getter
 public class RewardsConfig {
-  public List<Rewards> rewards = new ArrayList<>();
+  public List<Rewards> rewards = new CopyOnWriteArrayList<>();
 
   public void init() {
-    rewards.clear();
     File folder = Utils.getAbsolutePath(CobbleDailyRewards.PATH_REWARDS);
     if (!folder.exists()) {
       folder.mkdirs();
@@ -26,6 +26,7 @@ public class RewardsConfig {
     File[] files = folder.listFiles();
 
     if (files == null || files.length == 0) {
+      rewards.clear();
       CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleDailyRewards.PATH_REWARDS, "default.json",
         Utils.newGson().toJson(new Rewards()));
       if (!futureWrite.join()) {
@@ -34,6 +35,7 @@ public class RewardsConfig {
       return;
     }
 
+    List<Rewards> loadedRewards = new ArrayList<>();
     for (File file : files) {
       if (file.getName().endsWith(".json")) {
         CompletableFuture<Boolean> futureRead = Utils.readFileAsync(CobbleDailyRewards.PATH_REWARDS, file.getName(),
@@ -41,7 +43,7 @@ public class RewardsConfig {
             Rewards reward = Utils.newGson().fromJson(call, Rewards.class);
             reward.setId(file.getName().replace(".json", ""));
             reward.check();
-            rewards.add(reward);
+            loadedRewards.add(reward);
             Utils.writeFileSync(file, Utils.newGson().toJson(reward));
           });
         if (!futureRead.join()) {
@@ -49,6 +51,7 @@ public class RewardsConfig {
         }
       }
     }
-
+    rewards.clear();
+    rewards.addAll(loadedRewards);
   }
 }

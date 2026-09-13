@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.5] - 2026-09-13
+
+### Fixed
+
+- **Thread-Safety and Concurrency**: Fixed a `ConcurrentModificationException` crash when saving rewards and alerts in background tasks.
+- **Race Condition Prevention**: Converted internal player maps and reward lists to thread-safe collections to prevent desyncs during player joins and reloads.
+
 ## [1.1.4] - 2025-12-03
 
 ### Features

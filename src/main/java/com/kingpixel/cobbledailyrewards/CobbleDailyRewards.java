@@ -18,11 +18,11 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +40,7 @@ public class CobbleDailyRewards implements ModInitializer {
   public static Config config = new Config();
   public static Lang language = new Lang();
   public static RewardsConfig rewardsConfig = new RewardsConfig();
-  public static Map<UUID, UserInfo> userInfoMap = new HashMap<>();
+  public static Map<UUID, UserInfo> userInfoMap = new ConcurrentHashMap<>();
   public static final ExecutorService EXECUTOR_DAILY_REWARDS = Executors.newFixedThreadPool(4, new ThreadFactoryBuilder()
     .setDaemon(true)
     .setNameFormat("CobbleDailyRewards-Executor-%d")
@@ -61,7 +61,6 @@ public class CobbleDailyRewards implements ModInitializer {
     );
   }
 
-
   private static void files() {
     config.init();
     language.init();
@@ -72,7 +71,7 @@ public class CobbleDailyRewards implements ModInitializer {
     LOGGER.info("§e+-------------------------------+");
     LOGGER.info("§e| §6CobbleDailyRewards");
     LOGGER.info("§e+-------------------------------+");
-    LOGGER.info("§e| §6Version: §e" + "1.1.1");
+    LOGGER.info("§e| §6Version: §e" + "1.1.5");
     LOGGER.info("§e| §6Author: §eZonary123");
     LOGGER.info("§e| §6Website: §9https://github.com/Zonary123/CobbleDailyRewards");
     LOGGER.info("§e| §6Discord: §9https://discord.com/invite/fKNc7FnXpa");
@@ -91,7 +90,6 @@ public class CobbleDailyRewards implements ModInitializer {
     LifecycleEvent.SERVER_STARTED.register(server -> {
       load();
     });
-
 
     LifecycleEvent.SERVER_LEVEL_LOAD.register(level -> server = level.getServer());
 
@@ -117,12 +115,12 @@ public class CobbleDailyRewards implements ModInitializer {
     PlayerEvent.PLAYER_QUIT.register(player -> userInfoMap.remove(player.getUuid()));
   }
 
-
   private static void tasks() {
     if (taskAlert != null) taskAlert.setExpired();
 
     taskAlert = Task.builder()
       .execute(() -> CompletableFuture.runAsync(() -> {
+        if (server == null || server.getPlayerManager() == null) return;
         List<ServerPlayerEntity> players = server.getPlayerManager().getPlayerList();
         for (ServerPlayerEntity player : players) {
           sendAlert(player);
@@ -135,6 +133,7 @@ public class CobbleDailyRewards implements ModInitializer {
 
   private static void sendAlert(ServerPlayerEntity player) {
     UserInfo userInfo = DatabaseClientFactory.databaseClient.getUserInfo(player);
+    if (userInfo == null || userInfo.getCooldowns() == null) return;
     boolean someForClaim =
       userInfo.getCooldowns().values().stream().anyMatch(date -> date < System.currentTimeMillis());
     if (someForClaim) {

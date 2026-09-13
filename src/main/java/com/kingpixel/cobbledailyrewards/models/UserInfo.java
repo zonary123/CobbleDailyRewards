@@ -13,9 +13,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Carlos Varas Alonso - 15/08/2024 17:03
@@ -32,19 +32,26 @@ public class UserInfo implements Serializable {
   public UserInfo() {
     this.uuid = UUID.randomUUID();
     this.name = "";
-    this.cooldowns = new HashMap<>();
+    this.cooldowns = new ConcurrentHashMap<>();
   }
 
   public UserInfo(ServerPlayerEntity player) {
     this.uuid = player.getUuid();
     this.name = player.getGameProfile().getName();
-    this.cooldowns = new HashMap<>();
+    this.cooldowns = new ConcurrentHashMap<>();
   }
 
   public UserInfo(UUID uuid, String name, Map<String, Long> cooldowns) {
     this.uuid = uuid;
     this.name = name;
-    this.cooldowns = cooldowns;
+    this.cooldowns = (cooldowns != null) ? new ConcurrentHashMap<>(cooldowns) : new ConcurrentHashMap<>();
+  }
+
+  public Map<String, Long> getCooldowns() {
+    if (this.cooldowns == null) {
+      this.cooldowns = new ConcurrentHashMap<>();
+    }
+    return this.cooldowns;
   }
 
   public void writeInfo(UUID uuid) {
@@ -55,18 +62,21 @@ public class UserInfo implements Serializable {
 
     File file = new File(dir, uuid.toString() + ".json");
     try (FileWriter writer = new FileWriter(file)) {
-      Gson gson = new Gson();
+      Gson gson = Utils.newGson();
       gson.toJson(this, writer);
     } catch (IOException e) {
-      e.printStackTrace();
+      CobbleDailyRewards.LOGGER.error("Failed to save user info for " + uuid + ": " + e.getMessage());
     }
   }
 
   public void addCooldown(Rewards rewards, ServerPlayerEntity player) {
-    this.cooldowns.put(rewards.getId(), System.currentTimeMillis() + PlayerUtils.getCooldown(rewards.getCooldowns(), rewards.getCooldown(), player));
+    getCooldowns().put(rewards.getId(), System.currentTimeMillis() + PlayerUtils.getCooldown(rewards.getCooldowns(), rewards.getCooldown(), player));
   }
 
   public void fix(ServerPlayerEntity player) {
+    if (this.cooldowns == null) {
+      this.cooldowns = new ConcurrentHashMap<>();
+    }
     var rewards = CobbleDailyRewards.rewardsConfig.getRewards();
     for (Rewards reward : rewards) {
       if (!this.cooldowns.containsKey(reward.getId())) addCooldown(reward, player);
