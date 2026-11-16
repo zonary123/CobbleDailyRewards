@@ -1,7 +1,7 @@
 package com.kingpixel.cobbledailyrewards.command.base;
 
 import com.kingpixel.cobbledailyrewards.CobbleDailyRewards;
-import com.kingpixel.cobbledailyrewards.ui.DailyRewardUI;
+import com.kingpixel.cobbledailyrewards.api.DailyRewardsApi;
 import com.kingpixel.cobbleutils.api.PermissionApi;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -35,7 +35,7 @@ public class DailyRewardCommand implements Command<ServerCommandSource> {
           if (!CobbleDailyRewards.config.isActive()) return 0;
           ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
           if (player == null) return 0;
-          DailyRewardUI.open(player);
+          DailyRewardsApi.openMainMenu(player);
           return 1;
         })
         .then(
@@ -47,7 +47,7 @@ public class DailyRewardCommand implements Command<ServerCommandSource> {
                   if (!CobbleDailyRewards.config.isActive()) return 0;
                   ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
                   if (player == null) return 0;
-                  DailyRewardUI.open(player);
+                  DailyRewardsApi.openMainMenu(player);
                   return 1;
                 })
             )

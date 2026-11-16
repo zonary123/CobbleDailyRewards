@@ -18,6 +18,7 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import com.kingpixel.cobbleutils.util.UtilsFile;
 
 public class CobbleDailyRewards implements ModInitializer {
   public static final String MOD_ID = "cobbledailyrewards";
@@ -62,6 +64,7 @@ public class CobbleDailyRewards implements ModInitializer {
   }
 
   private static void files() {
+    UtilsFile.extractWiki(CobbleDailyRewards.class, Path.of("config", MOD_ID));
     config.init();
     language.init();
     rewardsConfig.init();
@@ -71,7 +74,7 @@ public class CobbleDailyRewards implements ModInitializer {
     LOGGER.info("§e+-------------------------------+");
     LOGGER.info("§e| §6CobbleDailyRewards");
     LOGGER.info("§e+-------------------------------+");
-    LOGGER.info("§e| §6Version: §e" + "1.1.5");
+    LOGGER.info("§e| §6Version: §e" + "1.2.0");
     LOGGER.info("§e| §6Author: §eZonary123");
     LOGGER.info("§e| §6Website: §9https://github.com/Zonary123/CobbleDailyRewards");
     LOGGER.info("§e| §6Discord: §9https://discord.com/invite/fKNc7FnXpa");

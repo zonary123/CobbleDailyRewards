@@ -35,7 +35,7 @@ loom {
     splitEnvironmentSourceSets()
 
     mods {
-        "cobblequests" {
+        "cobbledailyrewards" {
             sourceSet sourceSets.main
             sourceSet sourceSets.client
         }
@@ -50,7 +50,7 @@ fabricApi {
 
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
-    projectId = "CobbleQuests"
+    projectId = "CobbleDailyRewards"
     versionNumber = project.version
     versionType = "release"
     uploadFile = tasks.named("remapJar").flatMap { it.archiveFile }.get().asFile
@@ -113,6 +113,10 @@ dependencies {
     // Votifier
     implementation("com.github.NuVotifier.NuVotifier:nuvotifier-api:2.7.2")
     implementation("com.github.DrexHD:NuVotifier-Fabric:1.0.0-1.20.5")
+
+    // Test dependencies
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 processResources {
@@ -158,11 +162,36 @@ jar {
     }
 }
 
+tasks.register('apiJar', Jar) {
+    archiveClassifier.set('api')
+    from(sourceSets.main.output) {
+        include 'com/kingpixel/cobbledailyrewards/api/**'
+        include 'com/kingpixel/cobbledailyrewards/application/**'
+        include 'com/kingpixel/cobbledailyrewards/models/**'
+    }
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}
+
+tasks.named("build") {
+    dependsOn tasks.named("apiJar")
+}
+
+tasks.named("assemble") {
+    dependsOn tasks.named("apiJar")
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
 publishing {
     publications {
         create("mavenJava", MavenPublication) {
             artifactId = project.archivesBaseName
             from components.java
+            artifact tasks.named("apiJar")
         }
     }
 }

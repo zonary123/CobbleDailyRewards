@@ -1,7 +1,7 @@
 package com.kingpixel.cobbledailyrewards.command.base;
 
 import com.kingpixel.cobbledailyrewards.CobbleDailyRewards;
-import com.kingpixel.cobbledailyrewards.database.DatabaseClientFactory;
+import com.kingpixel.cobbledailyrewards.api.DailyRewardsApi;
 import com.kingpixel.cobbleutils.util.LuckPermsUtil;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -36,13 +36,7 @@ public class DailyRewardRestartCommand implements Command<ServerCommandSource> {
               if (!CobbleDailyRewards.config.isActive()) return 0;
               ServerPlayerEntity player = context.getSource().getPlayer();
               if (player == null) return 0;
-              CompletableFuture.runAsync(() -> {
-                  DatabaseClientFactory.databaseClient.restart(player);
-                }, CobbleDailyRewards.EXECUTOR_DAILY_REWARDS)
-                .exceptionally(e -> {
-                  e.printStackTrace();
-                  return null;
-                });
+              DailyRewardsApi.resetCooldowns(player);
               return 1;
             }).then(
               CommandManager.argument("player", EntityArgumentType.players())
@@ -50,9 +44,7 @@ public class DailyRewardRestartCommand implements Command<ServerCommandSource> {
                   if (!CobbleDailyRewards.config.isActive()) return 0;
                   ServerPlayerEntity player = EntityArgumentType.getPlayer(context, "player");
                   if (player == null) return 0;
-                  CompletableFuture.runAsync(() -> {
-                    DatabaseClientFactory.databaseClient.restart(player);
-                  }, CobbleDailyRewards.EXECUTOR_DAILY_REWARDS);
+                  DailyRewardsApi.resetCooldowns(player);
                   return 1;
                 })
             )

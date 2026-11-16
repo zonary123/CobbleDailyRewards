@@ -55,8 +55,6 @@ jobs:
 
       - name: Send Discord Notification with Embed and File
         run: |
-          FILE=$(ls build/libs/*.jar | grep -v "sources" | head -n1)
-          
           # Extraer changelog
           BASE=$(echo "$TAG" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
           CHANGELOG_CONTENT=$(tr -d '\r' < CHANGELOG.md | awk -v ver="$BASE" '
@@ -77,9 +75,14 @@ jobs:
             -H "Content-Type: application/json" \
             -d "$JSON_PAYLOAD"
           
-          # 2️⃣ Enviar después el archivo como segundo mensaje
-          curl -s -X POST "$DISCORD_WEBHOOK_URL" \
-            -F "file=@${FILE}"
+          # 2️⃣ Enviar después cada archivo jar generado (incluyendo api) como mensaje
+          for FILE in build/libs/*.jar; do
+            if [[ "$FILE" != *"-sources.jar" ]]; then
+              echo "Uploading $FILE to Discord..."
+              curl -s -X POST "$DISCORD_WEBHOOK_URL" \
+                -F "file=@${FILE}"
+            fi
+          done
 
       - name: Publish to Modrinth
         run: |
